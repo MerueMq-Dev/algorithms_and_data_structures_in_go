@@ -19,11 +19,10 @@ func (l *LinkedList) AddInTail(item Node) {
 
 	if l.head == nil {
 		l.head = &item
-		l.tail = &item
-		return
+	} else {
+		l.tail.next = &item
 	}
 
-	l.tail.next = &item
 	l.tail = &item
 }
 
@@ -41,34 +40,33 @@ func (l *LinkedList) InsertFirst(first Node) {
 // Память: O(1)
 func (l *LinkedList) Delete(n int, all bool) {
 	var prev *Node
-	current := l.head
+	node := l.head
 
-	for current != nil {
-		if current.value == n {
-			if prev == nil {
-				l.head = current.next
-			} else {
-				prev.next = current.next
-			}
-
-			if current == l.tail {
-				l.tail = prev
-			}
-
-			if !all {
-				return
-			}
-
-			current = current.next
+	for node != nil {
+		if node.value != n {
+			prev = node
+			node = node.next
 			continue
 		}
 
-		prev = current
-		current = current.next
-	}
+		next := node.next
 
-	if l.head == nil {
-		l.tail = nil
+		if prev == nil {
+			l.head = next
+		} else {
+			prev.next = next
+		}
+
+		if next == nil {
+			l.tail = prev
+		}
+
+		node.next = nil
+		node = next
+
+		if !all {
+			return
+		}
 	}
 }
 
@@ -76,32 +74,7 @@ func (l *LinkedList) Delete(n int, all bool) {
 // Время: O(n)
 // Память: O(1)
 func (l *LinkedList) DeleteAll(n int) {
-	var prev *Node
-	current := l.head
-
-	for current != nil {
-		if current.value == n {
-			if prev == nil {
-				l.head = current.next
-			} else {
-				prev.next = current.next
-			}
-
-			if current == l.tail {
-				l.tail = prev
-			}
-
-			current = current.next
-			continue
-		}
-
-		prev = current
-		current = current.next
-	}
-
-	if l.head == nil {
-		l.tail = nil
-	}
+	l.Delete(n, true)
 }
 
 // 3. Очистка всего содержимого списка.
@@ -116,15 +89,12 @@ func (l *LinkedList) Clean() {
 // Время: O(n)
 // Память: O(k), где k — количество найденных узлов.
 func (l *LinkedList) FindAll(n int) []Node {
-	nodes := []Node{}
-	current := l.head
+	var nodes []Node
 
-	for current != nil {
-		if current.value == n {
-			nodes = append(nodes, *current)
+	for node := l.head; node != nil; node = node.next {
+		if node.value == n {
+			nodes = append(nodes, *node)
 		}
-
-		current = current.next
 	}
 
 	return nodes
@@ -134,21 +104,24 @@ func (l *LinkedList) FindAll(n int) []Node {
 // Время: O(n)
 // Память: O(1)
 func (l *LinkedList) Count() int {
-	current := l.head
-	counter := 0
+	count := 0
 
-	for current != nil {
-		counter++
-		current = current.next
+	for node := l.head; node != nil; node = node.next {
+		count++
 	}
 
-	return counter
+	return count
 }
 
 // 6. Вставка нового узла после заданного узла.
 // Время: O(1)
 // Память: O(1)
 func (l *LinkedList) Insert(after *Node, add Node) {
+	if after == nil {
+		l.InsertFirst(add)
+		return
+	}
+
 	add.next = after.next
 	after.next = &add
 
@@ -161,15 +134,11 @@ func (l *LinkedList) Insert(after *Node, add Node) {
 // Время: O(n)
 // Память: O(1)
 func (l *LinkedList) Find(n int) (Node, error) {
-	current := l.head
-
-	for current != nil {
-		if current.value == n {
-			return *current, nil
+	for node := l.head; node != nil; node = node.next {
+		if node.value == n {
+			return *node, nil
 		}
-
-		current = current.next
 	}
 
-	return Node{}, errors.New("node not found")
+	return Node{value: -1, next: nil}, errors.New("node not found")
 }

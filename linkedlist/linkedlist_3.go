@@ -47,11 +47,11 @@ func assertList(t *testing.T, list *LinkedList, expected []int) {
 	}
 
 	if list.head == nil {
-		t.Error("expected head to be non-nil")
+		t.Fatal("expected head to be non-nil")
 	}
 
 	if list.tail == nil {
-		t.Error("expected tail to be non-nil")
+		t.Fatal("expected tail to be non-nil")
 	}
 
 	if list.tail.value != expected[len(expected)-1] {
@@ -61,7 +61,6 @@ func assertList(t *testing.T, list *LinkedList, expected []int) {
 	if list.tail.next != nil {
 		t.Error("expected tail.next to be nil")
 	}
-
 }
 
 // AddInTail
@@ -76,7 +75,6 @@ func TestAddInTailEmptyList(t *testing.T) {
 	if list.head != list.tail {
 		t.Error("head and tail should point to the same node")
 	}
-
 }
 
 func TestAddInTailMultipleNodes(t *testing.T) {
@@ -118,7 +116,6 @@ func TestCountOneElement(t *testing.T) {
 	if got := list.Count(); got != 1 {
 		t.Errorf("expected 1, got %d", got)
 	}
-
 }
 
 func TestCountMultipleElements(t *testing.T) {
@@ -127,7 +124,6 @@ func TestCountMultipleElements(t *testing.T) {
 	if got := list.Count(); got != 5 {
 		t.Errorf("expected 5, got %d", got)
 	}
-
 }
 
 // Find
@@ -143,7 +139,6 @@ func TestFindExistingNode(t *testing.T) {
 	if node.value != 20 {
 		t.Errorf("expected value 20, got %d", node.value)
 	}
-
 }
 
 func TestFindFirstMatchingNode(t *testing.T) {
@@ -175,7 +170,6 @@ func TestFindEmptyList(t *testing.T) {
 	if err == nil {
 		t.Error("expected error, got nil")
 	}
-
 }
 
 // FindAll
