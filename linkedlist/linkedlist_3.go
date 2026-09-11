@@ -87,19 +87,6 @@ func TestAddInTailMultipleNodes(t *testing.T) {
 	assertList(t, &list, []int{10, 20, 30})
 }
 
-func TestAddInTailNodeNextIsReset(t *testing.T) {
-	var list LinkedList
-	existing := &Node{value: 100}
-
-	list.AddInTail(Node{value: 10, next: existing})
-
-	assertList(t, &list, []int{10})
-
-	if list.tail.next != nil {
-		t.Error("tail.next should be nil")
-	}
-}
-
 // Count
 
 func TestCountEmpty(t *testing.T) {

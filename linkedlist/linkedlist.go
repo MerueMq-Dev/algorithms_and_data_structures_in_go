@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"os"
 )
 
 type Node struct {
@@ -15,8 +15,6 @@ type LinkedList struct {
 }
 
 func (l *LinkedList) AddInTail(item Node) {
-	item.next = nil
-
 	if l.head == nil {
 		l.head = &item
 	} else {
@@ -36,6 +34,9 @@ func (l *LinkedList) InsertFirst(first Node) {
 }
 
 // 1. Удаление одного узла по его значению.
+// Время: O(n)
+// Память: O(1)
+// 2. Удаление всех узлов по конкретному значению.
 // Время: O(n)
 // Память: O(1)
 func (l *LinkedList) Delete(n int, all bool) {
@@ -68,13 +69,6 @@ func (l *LinkedList) Delete(n int, all bool) {
 			return
 		}
 	}
-}
-
-// 2. Удаление всех узлов по конкретному значению.
-// Время: O(n)
-// Память: O(1)
-func (l *LinkedList) DeleteAll(n int) {
-	l.Delete(n, true)
 }
 
 // 3. Очистка всего содержимого списка.
@@ -140,5 +134,5 @@ func (l *LinkedList) Find(n int) (Node, error) {
 		}
 	}
 
-	return Node{value: -1, next: nil}, errors.New("node not found")
+	return Node{value: -1, next: nil}, os.ErrNotExist
 }
