@@ -113,7 +113,6 @@ func (l *LinkedList) Count() int {
 // Память: O(1)
 func (l *LinkedList) Insert(after *Node, add Node) {
 	if after == nil {
-		l.InsertFirst(add)
 		return
 	}
 
