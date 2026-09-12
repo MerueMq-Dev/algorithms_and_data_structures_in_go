@@ -4,6 +4,7 @@ import (
 	"os"
 )
 
+// Задание 1. Связный (связанный) список.
 type Node struct {
 	next  *Node
 	value int

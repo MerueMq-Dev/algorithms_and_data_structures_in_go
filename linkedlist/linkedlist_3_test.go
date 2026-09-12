@@ -2,6 +2,7 @@ package main
 
 import "testing"
 
+// Задание 1. Связный (связанный) список.
 func makeList(values ...int) LinkedList {
 	var list LinkedList
 	for _, value := range values {
