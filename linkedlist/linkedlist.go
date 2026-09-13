@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"reflect"
 )
 
 // Задание 1. Связный (связанный) список.
