@@ -5,8 +5,6 @@ import (
 	"reflect"
 )
 
-var _ = reflect.DeepEqual
-
 // Задание 1. Связный (связанный) список.
 type Node struct {
 	next  *Node
@@ -48,7 +46,7 @@ func (l *LinkedList) Delete(n int, all bool) {
 	node := l.head
 
 	for node != nil {
-		if node.value != n {
+		if !equalValues(node.value, n) {
 			prev = node
 			node = node.next
 			continue
@@ -90,7 +88,7 @@ func (l *LinkedList) FindAll(n int) []Node {
 	var nodes []Node
 
 	for node := l.head; node != nil; node = node.next {
-		if node.value == n {
+		if equalValues(node.value, n) {
 			nodes = append(nodes, *node)
 		}
 	}
@@ -132,10 +130,14 @@ func (l *LinkedList) Insert(after *Node, add Node) {
 // Память: O(1)
 func (l *LinkedList) Find(n int) (Node, error) {
 	for node := l.head; node != nil; node = node.next {
-		if node.value == n {
+		if equalValues(node.value, n) {
 			return *node, nil
 		}
 	}
 
 	return Node{value: -1, next: nil}, os.ErrNotExist
+}
+
+func equalValues(a, b int) bool {
+	return reflect.DeepEqual(a, b)
 }
