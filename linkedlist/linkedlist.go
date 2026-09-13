@@ -5,6 +5,8 @@ import (
 	"reflect"
 )
 
+var _ = reflect.DeepEqual
+
 // Задание 1. Связный (связанный) список.
 type Node struct {
 	next  *Node

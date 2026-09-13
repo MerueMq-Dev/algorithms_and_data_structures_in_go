@@ -2,7 +2,6 @@ package main
 
 import "testing"
 
-// Задание 1. Связный (связанный) список.
 func makeList(values ...int) LinkedList {
 	var list LinkedList
 	for _, value := range values {
@@ -86,6 +85,21 @@ func TestAddInTailMultipleNodes(t *testing.T) {
 	list.AddInTail(Node{value: 30})
 
 	assertList(t, &list, []int{10, 20, 30})
+}
+
+func TestAddInTailKeepsNextOfNode(t *testing.T) {
+	var list LinkedList
+	existing := &Node{value: 100}
+
+	list.AddInTail(Node{value: 10, next: existing})
+
+	if list.head == nil || list.head.value != 10 {
+		t.Fatal("expected node 10 to become the head")
+	}
+
+	if list.head.next != existing {
+		t.Error("expected next of the added node to be preserved")
+	}
 }
 
 // Count
@@ -278,16 +292,28 @@ func TestDeleteAllOccurrencesOfOnlyValue(t *testing.T) {
 
 // Insert
 
-func TestInsertIntoEmptyList(t *testing.T) {
+
+func TestInsertWithNilIntoEmptyList(t *testing.T) {
 	var list LinkedList
 	list.Insert(nil, Node{value: 10})
-	assertList(t, &list, []int{10})
+	assertList(t, &list, []int{})
 }
 
-func TestInsertAtBeginningWithNil(t *testing.T) {
+func TestInsertWithNilKeepsListIntact(t *testing.T) {
 	list := makeList(20, 30)
+	head, tail := list.head, list.tail
+
 	list.Insert(nil, Node{value: 10})
-	assertList(t, &list, []int{10, 20, 30})
+
+	assertList(t, &list, []int{20, 30})
+
+	if list.head != head {
+		t.Error("head should not change")
+	}
+
+	if list.tail != tail {
+		t.Error("tail should not change")
+	}
 }
 
 func TestInsertAfterHead(t *testing.T) {
