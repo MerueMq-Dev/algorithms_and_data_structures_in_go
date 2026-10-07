@@ -38,6 +38,18 @@ func TestHashFunDeterministic(t *testing.T) {
 	}
 }
 
+func TestHashFunNumbers(t *testing.T) {
+	ht := Init(17, 3)
+
+	cases := map[string]int{"0": 0, "5": 5, "22": 5, "-1": 16, "+3": 3}
+
+	for value, want := range cases {
+		if got := ht.HashFun(value); got != want {
+			t.Errorf("HashFun(%q): expected %d, got %d", value, want, got)
+		}
+	}
+}
+
 func TestHashFunSpreadsValues(t *testing.T) {
 	ht := Init(17, 3)
 	used := map[int]bool{}

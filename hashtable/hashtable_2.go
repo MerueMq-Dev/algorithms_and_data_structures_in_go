@@ -126,15 +126,13 @@ func (d *DoubleHashTable) StepFun(value string) int {
 // Время: O(1) в среднем
 // Память: O(1)
 func (d *DoubleHashTable) Put(value string) int {
-	index := d.table.seekFrom(d.table.HashFun(value), d.StepFun(value))
-
-	return d.table.putAt(index, value)
+	return d.table.putFrom(d.table.HashFun(value), d.StepFun(value), value)
 }
 
 // Время: O(1) в среднем
 // Память: O(1)
 func (d *DoubleHashTable) Find(value string) int {
-	return d.table.findFrom(d.table.HashFun(value), d.StepFun(value), value)
+	return slotOrMinus(d.table.findFrom(d.table.HashFun(value), d.StepFun(value), value))
 }
 
 // 5*. Атака: подбираем ключи, которые попадают в один слот.
@@ -176,15 +174,13 @@ func (st *SaltedHashTable) HashFun(value string) int {
 // Время: O(1) в среднем
 // Память: O(1)
 func (st *SaltedHashTable) Put(value string) int {
-	index := st.table.seekFrom(st.HashFun(value), st.table.step)
-
-	return st.table.putAt(index, value)
+	return st.table.putFrom(st.HashFun(value), st.table.step, value)
 }
 
 // Время: O(1) в среднем
 // Память: O(1)
 func (st *SaltedHashTable) Find(value string) int {
-	return st.table.findFrom(st.HashFun(value), st.table.step, value)
+	return slotOrMinus(st.table.findFrom(st.HashFun(value), st.table.step, value))
 }
 
 // Рефлексия по заданию 6.

@@ -1,5 +1,10 @@
 package main
 
+import (
+	"os"
+	"strconv"
+)
+
 // Задание 8. Хэш-таблица.
 const hashBase = 31
 
@@ -17,10 +22,14 @@ func Init(sz int, stp int) HashTable {
 	return ht
 }
 
-// Полиномиальный хэш по байтам строки.
+// Числа хэшируются как числа, остальные строки — полиномиально по байтам.
 // Время: O(k), где k — длина строки
 // Память: O(1)
 func (ht *HashTable) HashFun(value string) int {
+	if number, err := strconv.Atoi(value); err == nil {
+		return (number%ht.size + ht.size) % ht.size
+	}
+
 	hash := 0
 
 	for i := 0; i < len(value); i++ {
@@ -34,57 +43,66 @@ func (ht *HashTable) HashFun(value string) int {
 // Время: O(1) в среднем
 // Память: O(1)
 func (ht *HashTable) SeekSlot(value string) int {
-	return ht.seekFrom(ht.HashFun(value), ht.step)
+	return slotOrMinus(ht.seekFrom(ht.HashFun(value), ht.step))
 }
 
 // Время: O(1) в среднем
 // Память: O(1)
 func (ht *HashTable) Put(value string) int {
-	return ht.putAt(ht.SeekSlot(value), value)
+	return ht.putFrom(ht.HashFun(value), ht.step, value)
 }
 
 // Слот со значением или -1.
 // Время: O(1) в среднем
 // Память: O(1)
 func (ht *HashTable) Find(value string) int {
-	return ht.findFrom(ht.HashFun(value), ht.step, value)
+	return slotOrMinus(ht.findFrom(ht.HashFun(value), ht.step, value))
 }
 
-func (ht *HashTable) seekFrom(start int, step int) int {
+func (ht *HashTable) seekFrom(start int, step int) (int, error) {
 	for i := 0; i < ht.size; i++ {
 		index := (start + i*step) % ht.size
 
 		if !ht.filled[index] {
-			return index
+			return index, nil
 		}
 	}
 
-	return -1
+	return -1, os.ErrNotExist
 }
 
-func (ht *HashTable) findFrom(start int, step int, value string) int {
+func (ht *HashTable) findFrom(start int, step int, value string) (int, error) {
 	for i := 0; i < ht.size; i++ {
 		index := (start + i*step) % ht.size
 
 		if !ht.filled[index] {
-			return -1
+			break
 		}
 
 		if ht.slots[index] == value {
-			return index
+			return index, nil
 		}
 	}
 
-	return -1
+	return -1, os.ErrNotExist
 }
 
-func (ht *HashTable) putAt(index int, value string) int {
-	if index < 0 {
+func (ht *HashTable) putFrom(start int, step int, value string) int {
+	index, err := ht.seekFrom(start, step)
+	if err != nil {
 		return -1
 	}
 
 	ht.slots[index] = value
 	ht.filled[index] = true
+
+	return index
+}
+
+func slotOrMinus(index int, err error) int {
+	if err != nil {
+		return -1
+	}
 
 	return index
 }
