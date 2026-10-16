@@ -38,30 +38,22 @@ func TestSetAndClearBit(t *testing.T) {
 	bf.setBit(5)
 	bf.setBit(31)
 
-	if bf.bits[0] != 1<<0|1<<5|1<<31 {
-		t.Errorf("unexpected bits %032b", bf.bits[0])
+	if bf.bits != 1<<0|1<<5|1<<31 {
+		t.Errorf("unexpected bits %032b", bf.bits)
 	}
 
 	bf.clearBit(5)
 
 	if bf.getBit(5) || !bf.getBit(0) || !bf.getBit(31) {
-		t.Errorf("unexpected bits %032b", bf.bits[0])
-	}
-}
-
-func TestBitsAcrossWords(t *testing.T) {
-	bf := &BloomFilter{filter_len: 70}
-
-	bf.setBit(69)
-
-	if len(bf.bits) != 3 || bf.bits[2] != 1<<5 || !bf.getBit(69) || bf.getBit(5) {
-		t.Errorf("unexpected words %v", bf.bits)
+		t.Errorf("unexpected bits %032b", bf.bits)
 	}
 }
 
 func TestNewBloomFilter(t *testing.T) {
-	if _, err := NewBloomFilter(0); err == nil {
-		t.Error("expected error for zero length")
+	for _, length := range []int{0, 33} {
+		if _, err := NewBloomFilter(length); err == nil {
+			t.Errorf("expected error for length %d", length)
+		}
 	}
 
 	if bf, err := NewBloomFilter(32); err != nil || bf.filter_len != 32 {
@@ -74,7 +66,6 @@ func TestNewBloomFilter(t *testing.T) {
 func TestHashSmallStrings(t *testing.T) {
 	bf := makeFilter()
 
-	// "a" = 97, "b" = 98: (0*r + 97) % 32 = 1, затем (1*r + 98) % 32.
 	cases := []struct {
 		s            string
 		hash1, hash2 int
@@ -121,11 +112,23 @@ func TestEmptyFilter(t *testing.T) {
 	}
 }
 
+func TestValueCopies(t *testing.T) {
+	var bf BloomFilter
+	bf.filter_len = 32
+
+	copied := bf
+	copied.Add("0123456789")
+
+	if !copied.IsValue("0123456789") || bf.IsValue("0123456789") {
+		t.Error("expected copies to be independent")
+	}
+}
+
 func TestAddSetsHashBits(t *testing.T) {
 	bf := makeFilter("0123456789")
 
-	if bf.bits[0] != 1<<13|1<<5 {
-		t.Errorf("expected bits 13 and 5, got %032b", bf.bits[0])
+	if bf.bits != 1<<13|1<<5 {
+		t.Errorf("expected bits 13 and 5, got %032b", bf.bits)
 	}
 }
 
@@ -152,7 +155,6 @@ func TestMissingStrings(t *testing.T) {
 func TestFalsePositiveExists(t *testing.T) {
 	bf := makeFilter(testStrings()...)
 
-	// Не добавлялась, но даёт те же биты, что и "1234567890".
 	if !bf.IsValue("9876543210") {
 		t.Error("expected a false positive")
 	}
@@ -173,7 +175,7 @@ func TestMergeEqualsSingleFilter(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !slices.Equal(merged.bits, makeFilter(values...).bits) {
+	if merged.bits != makeFilter(values...).bits {
 		t.Errorf("expected merged bits to match one filter")
 	}
 
@@ -208,7 +210,7 @@ func TestMergeErrors(t *testing.T) {
 		t.Error("expected error for no filters")
 	}
 
-	if _, err := Merge(makeFilter(), &BloomFilter{filter_len: 64}); err == nil {
+	if _, err := Merge(makeFilter(), &BloomFilter{filter_len: 16}); err == nil {
 		t.Error("expected error for different sizes")
 	}
 }
@@ -233,7 +235,6 @@ func TestCountingAddRemove(t *testing.T) {
 func TestCountingSharedBits(t *testing.T) {
 	cf, _ := NewCountingBloomFilter(32)
 
-	// Обе строки дают биты 13 и 5.
 	cf.Add("0123456789")
 	cf.Add("2345678901")
 
@@ -279,7 +280,6 @@ func TestCountingFalsePositiveBreaksFilter(t *testing.T) {
 	cf, _ := NewCountingBloomFilter(32)
 	cf.Add("1234567890")
 
-	// Ложное срабатывание: удаление проходит и стирает чужие счётчики.
 	if err := cf.Remove("9876543210"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -351,7 +351,6 @@ func TestRecoverAmbiguous(t *testing.T) {
 		}
 	}
 
-	// У всех строк одни и те же 4 бита, поэтому ни одну нельзя назвать точно.
 	if len(sure) != 0 {
 		t.Errorf("expected no sure values, got %v", sure)
 	}

@@ -8,10 +8,10 @@ import (
 // Задание 11. Фильтр Блюма.
 
 // 2*. Слияние фильтров.
-// Ложных срабатываний становится больше: p ≈ (1 - e^(-kN/m))^k, где N — все
-// значения всех фильтров.
-// Время: O(f * m / 32), где f — число фильтров
-// Память: O(m / 32)
+// Ложных срабатываний становится больше: P = 0,6931^(m/N), где N — сколько
+// значений во всех фильтрах вместе.
+// Время: O(f), где f — число фильтров
+// Память: O(1)
 func Merge(filters ...*BloomFilter) (*BloomFilter, error) {
 	if len(filters) == 0 {
 		return nil, errors.New("no filters to merge")
@@ -22,16 +22,12 @@ func Merge(filters ...*BloomFilter) (*BloomFilter, error) {
 		return nil, err
 	}
 
-	result.ensureBits()
-
 	for _, filter := range filters {
 		if filter.filter_len != result.filter_len {
 			return nil, errors.New("filters have different sizes")
 		}
 
-		for i, word := range filter.bits {
-			result.bits[i] |= word
-		}
+		result.bits |= filter.bits
 	}
 
 	return result, nil
@@ -58,7 +54,6 @@ func NewCountingBloomFilter(filterLen int) (*CountingBloomFilter, error) {
 // Память: O(1)
 func (cf *CountingBloomFilter) Add(s string) {
 	for _, i := range bitPositions(&cf.filter, s) {
-		// Переполненный счётчик больше не меняется, иначе он мог бы обнулиться.
 		if cf.counters[i] < maxCounter {
 			cf.counters[i]++
 		}
@@ -94,7 +89,7 @@ func (cf *CountingBloomFilter) Remove(s string) error {
 }
 
 // 4*. Восстановление исходного множества.
-// Точно добавлен тот, кто один ставит какой-то бит.
+// Если какой-то бит ставит только одна строка, она точно была добавлена.
 // Время: O(c * k), где c — число кандидатов
 // Память: O(c + m)
 func Recover(bf *BloomFilter, candidates []string) (sure []string, possible []string, err error) {
@@ -128,7 +123,6 @@ func Recover(bf *BloomFilter, candidates []string) (sure []string, possible []st
 	return sure, possible, nil
 }
 
-// Обе хэш-функции могут дать одну позицию — тогда она считается один раз.
 func bitPositions(bf *BloomFilter, s string) []int {
 	first := bf.Hash1(s)
 	second := bf.Hash2(s)

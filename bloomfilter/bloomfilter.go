@@ -6,18 +6,18 @@ import (
 
 // Задание 11. Фильтр Блюма.
 const (
-	random1  = 17
-	random2  = 223
-	wordBits = 32
+	random1 = 17
+	random2 = 223
+	maxLen  = 32
 )
 
 type BloomFilter struct {
 	filter_len int
-	bits       []uint32
+	bits       uint32
 }
 
 func NewBloomFilter(filterLen int) (*BloomFilter, error) {
-	if filterLen < 1 {
+	if filterLen < 1 || filterLen > maxLen {
 		return nil, os.ErrInvalid
 	}
 
@@ -65,25 +65,13 @@ func (bf *BloomFilter) hash(s string, random int) int {
 }
 
 func (bf *BloomFilter) setBit(i int) {
-	bf.ensureBits()
-	bf.bits[i/wordBits] |= 1 << (i % wordBits)
+	bf.bits |= 1 << i
 }
 
 func (bf *BloomFilter) clearBit(i int) {
-	bf.ensureBits()
-	bf.bits[i/wordBits] &^= 1 << (i % wordBits)
+	bf.bits &^= 1 << i
 }
 
 func (bf *BloomFilter) getBit(i int) bool {
-	if bf.bits == nil {
-		return false
-	}
-
-	return bf.bits[i/wordBits]&(1<<(i%wordBits)) != 0
-}
-
-func (bf *BloomFilter) ensureBits() {
-	if bf.bits == nil {
-		bf.bits = make([]uint32, (bf.filter_len+wordBits-1)/wordBits)
-	}
+	return (bf.bits>>i)&1 == 1
 }
